@@ -9,13 +9,14 @@ if (isset($_POST['btnLogin'])) {
     $password = trim($_POST['txtPsw']);
 
     // Prepare SQL query to prevent SQL injection
-    $query = "SELECT Password FROM AGRICULTURAL_OFFICER WHERE OfficerID = ? LIMIT 1";
+    $query = "SELECT Password FROM Farmer WHERE FarmerId = ? LIMIT 1";
     $stmt = mysqli_prepare($conn, $query);
 
     if ($stmt) {
         mysqli_stmt_bind_param($stmt, "s", $userID);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
+        echo $userID . " " .$password;
 
         if (mysqli_stmt_num_rows($stmt) == 1) {
             mysqli_stmt_bind_result($stmt, $hashed_password);
@@ -25,7 +26,7 @@ if (isset($_POST['btnLogin'])) {
 			// todo create better way to authenticate user 
             if ($password == $hashed_password) {
                 $_SESSION['userID'] = $userID;
-                header("Location: http://localhost/Fertilizer-Distribution-Management-System/Farmers.php");
+                header("Location: FarmersView.php");
                 exit;
             } else {
                 $msg = "Invalid Username or Password";
@@ -44,7 +45,7 @@ if (isset($_POST['btnLogin'])) {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Log In</title>
+	<title>Farmer Log In</title>
 	<link href="https://fonts.googleapis.com/css?family=Baloo+Da+2|Cabin|Roboto&display=swap" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
@@ -54,11 +55,11 @@ if (isset($_POST['btnLogin'])) {
 		<a href="#" class="navbar-brand"><img src="img/ktdalogo.png" alt="" style="width: 200px;"></a>
 		<button class="navbar-toggler" data-toggle="collapse" data-target="#navbar_id"><span class="navbar-toggler-icon"></span></button>
 		<div class="collapse navbar-collapse justify-content-center" id="navbar_id">
-		<ul class="navbar-nav">
+        <ul class="navbar-nav">
 				<li class="nav-item"><a href="index.html" class="nav-link">HOME</a></li>
-				<li class="nav-item"><a href="Login.php" class="nav-link active">AGRICULTURAL OFFICER LOGIN</a></li>
-				<li class="nav-item"><a href="farmerLogin.php" class="nav-link">FARMER LOGIN</a></li>
-			</ul>
+				<li class="nav-item"><a href="Login.php" class="nav-link">AGRICULTURAL OFFICER LOGIN</a></li>
+				<li class="nav-item"><a href="farmerLogin.php" class="nav-link active">FARMER LOGIN</a></li>
+        </ul>
 		</collapse>	
 	</nav><!-- class="navbar" -->
 
@@ -74,11 +75,11 @@ if (isset($_POST['btnLogin'])) {
 
 		<dic class="column">
 			<img class="contactpic" src="wave/profilepic.svg">
-			<form action="Login.php" class="signup"  method="post">
+			<form action="farmerLogin.php" class="signup"  method="post">
 				<br>
 				<label for="lblMsg"><b><?php echo (isset($msg)) ? $msg : ''; ?></b></label>
 				<br>
-				<input type="text" name="txtUName" placeholder="Officer ID" required>
+				<input type="text" name="txtUName" placeholder="Farmer ID" required>
 				<br>
 				<input type="password" name="txtPsw" placeholder="Password" required>
 				<br>

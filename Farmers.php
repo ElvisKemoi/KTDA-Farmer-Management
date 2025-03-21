@@ -49,12 +49,13 @@ if (isset($_POST['btn_update'])) {
     $address = $_POST['txtAddress'];
     $telNo = $_POST['txtTelNo'];
     $NIC = $_POST['txtNIC'];
+    $farmerPass = $_POST['txtFarmerPass'];
 
-    $query = "UPDATE FARMER SET FName = ?, LName = ?, Address = ?, TelNo = ?, NIC = ? WHERE FarmerID = ?";
+    $query = "UPDATE FARMER SET FName = ?, LName = ?, Address = ?, TelNo = ?, NIC = ?, Password = ? WHERE FarmerID = ?";
     $stmt = mysqli_prepare($conn, $query);
 
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "ssssss", $firstName, $lastName, $address, $telNo, $NIC, $farmerID);
+        mysqli_stmt_bind_param($stmt, "ssssss", $firstName, $lastName, $address, $telNo, $NIC, $farmerID, $farmerPass);
         $result = mysqli_stmt_execute($stmt);
 
         $msg2 = $result ? "Record updated successfully" : "Failed updating the record";
@@ -70,12 +71,14 @@ if (isset($_POST['btn_save'])) {
     $address = $_POST['txtAddress'];
     $telNo = $_POST['txtTelNo'];
     $NIC = $_POST['txtNIC'];
+    $farmerPass = $_POST['txtFarmerPass'];
 
-    $query = "INSERT INTO FARMER (FarmerID, FName, LName, Address, TelNo, NIC) VALUES (?, ?, ?, ?, ?, ?)";
+
+    $query = "INSERT INTO FARMER (FarmerID, FName, LName, Address, TelNo, NIC, Password) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $query);
 
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "ssssss", $farmerID, $firstName, $lastName, $address, $telNo, $NIC);
+        mysqli_stmt_bind_param($stmt, "ssssss", $farmerID, $firstName, $lastName, $address, $telNo, $NIC, $farmerPass);
         $result = mysqli_stmt_execute($stmt);
 
         $msg2 = $result ? "New farmer added successfully" : "Failed adding new record";
@@ -114,6 +117,7 @@ if (isset($_POST['btnSearchID'])) {
             $lastName = $record['LName'];
             $address = $record['Address'];
             $telNo = $record['TelNo'];
+            $farmerPass = $record['Password'];
         } else {
             $msg1 = "No such Farmer ID exists";
         }
@@ -168,6 +172,10 @@ if (isset($_POST['btnSearchID'])) {
             <tr>
                 <td>Tel No : </td>
                 <td><input type="text" name = "txtTelNo" value = "<?php echo (isset($telNo)) ? $telNo : ''; ?>"></input></td>
+            </tr>
+            <tr>
+                <td>Password : </td>
+                <td><input type="password" name = "txtFarmerPass" value = "<?php echo (isset($farmerPass)) ? $farmerPass : ''; ?>"></input></td>
             </tr>
             
             <tr>
