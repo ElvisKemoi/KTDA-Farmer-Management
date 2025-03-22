@@ -25,7 +25,8 @@ if (isset($_POST['btnLogin'])) {
 			// todo create better way to authenticate user 
             if ($password == $hashed_password) {
                 $_SESSION['userID'] = $userID;
-                header("Location: http://localhost/Fertilizer-Distribution-Management-System/Farmers.php");
+				$_SESSION['role'] = 'officer';
+                header("Location: Farmers.php");
                 exit;
             } else {
                 $msg = "Invalid Username or Password";

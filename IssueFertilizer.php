@@ -1,314 +1,148 @@
 <?php 
-require_once('includes/connection.php');
+require_once('includes/connection.php'); 
 session_start();
 
-// Check if the user is logged in
-if (!isset($_SESSION['userID'])) {
-    header("Location: login.php"); // Redirect to login page
-    exit();
+// Check if the user is logged in as an agricultural officer
+if (!isset($_SESSION['userID']) || $_SESSION['role'] !== 'officer') {
+    header("Location: login.php");
+    exit;
 }
-    $officerID = $_SESSION['userID'];
-    $query = "SELECT OfficerID, CenterID, FName, LName FROM AGRICULTURAL_OFFICER WHERE OfficerID = '{$officerID}' LIMIT 1";
 
-    $result = mysqli_query($conn, $query);
+$officerId = $_SESSION['userID'];
+$query = "SELECT OfficerID, FName, LName, CenterID FROM AGRICULTURAL_OFFICER WHERE OfficerID = ? LIMIT 1";
+$stmt = mysqli_prepare($conn, $query);
+
+if ($stmt) {
+    mysqli_stmt_bind_param($stmt, "s", $officerId);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
 
     if ($recordRow = mysqli_fetch_assoc($result)) {
-
-        $userOfficerID = $recordRow['OfficerID'];
-        $userCenterID = $recordRow['CenterID'];
+        $userOfficerId = $recordRow['OfficerID'];
         $userFName = $recordRow['FName'];
         $userLName = $recordRow['LName'];
-
-        $msgViewUser = "Login as        {$userOfficerID} - {$userFName} {$userLName}        under Center - {$userCenterID}";
-
+        $centerId = $recordRow['CenterID'];
+    } else {
+        die("User details not found.");
     }
+    mysqli_stmt_close($stmt);
+}
 
-    if (isset($_POST['txtFarmerID'])) {
+// Handle approval request
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['approve'])) {
+    $requestId = $_POST['requestId'];
+    $landId = $_POST['landId'];
+    $fertilizerId = $_POST['fertilizerId'];
+    $amountRequested = floatval($_POST['amountRequested']); // Ensure it's a float
 
-        $farmerID = $_POST['txtFarmerID'];
-        
-        $query1 = "SELECT FName, LName FROM FARMER WHERE FarmerID = '{$farmerID}' LIMIT 1";
-        $query2 = "SELECT LandID FROM CULTIVATION WHERE FarmerID = '{$farmerID}' and OfficerID = '{$officerID}'";
+    // Check fertilizer stock in officer's center
+    $stockQuery = "SELECT QtyOnHand FROM STORES WHERE FertilizerID = ? AND CenterID = ? LIMIT 1";
+    $stmt = mysqli_prepare($conn, $stockQuery);
+    mysqli_stmt_bind_param($stmt, "ss", $fertilizerId, $centerId);
+    mysqli_stmt_execute($stmt);
+    $stockResult = mysqli_stmt_get_result($stmt);
+    $stockRow = mysqli_fetch_assoc($stockResult);
 
-        $result1 = mysqli_query($conn, $query1);
-
-        if ($record = mysqli_fetch_assoc($result1)) {
-
-            $msg1 = $record['FName'] . " " . $record['LName'];
-
-            $result2 = mysqli_query($conn, $query2);
-
-        } else {
-            $msg1 = "No such FarmerID exists";
+    if ($stockRow && $stockRow['QtyOnHand'] >= $amountRequested) {
+        // Deduct from stock
+        $updateStockQuery = "UPDATE STORES SET QtyOnHand = QtyOnHand - ? WHERE FertilizerID = ? AND CenterID = ?";
+        $stmt = mysqli_prepare($conn, $updateStockQuery);
+        mysqli_stmt_bind_param($stmt, "dss", $amountRequested, $fertilizerId, $centerId);
+        if (!mysqli_stmt_execute($stmt)) {
+            die("Error updating stock: " . mysqli_error($conn));
         }
-        
+
+        // Insert into RECEIVES table
+        $issueDate = date('Y-m-d');
+        $insertQuery = "INSERT INTO RECEIVES (LandID, FertilizerID, IssueDate, Amount) VALUES (?, ?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $insertQuery);
+        mysqli_stmt_bind_param($stmt, "sssd", $landId, $fertilizerId, $issueDate, $amountRequested);
+        if (!mysqli_stmt_execute($stmt)) {
+            die("Error inserting into RECEIVES: " . mysqli_error($conn));
+        }
+
+        // Delete the request
+        $deleteRequestQuery = "DELETE FROM FertilizerRequest WHERE requestId = ?";
+        $stmt = mysqli_prepare($conn, $deleteRequestQuery);
+        mysqli_stmt_bind_param($stmt, "i", $requestId);
+        if (!mysqli_stmt_execute($stmt)) {
+            die("Error deleting request: " . mysqli_error($conn));
+        }
+
+        echo "<p>Request approved successfully!</p>";
+    } else {
+        echo "<p>Insufficient stock in your center to approve this request.</p>";
     }
-
-    if (isset($_POST['btnBrowseLand'])) {
-
-        $LandID = $_POST['listLandIDs'];
-
-        $query1 = "SELECT * FROM CULTIVATION WHERE LandID = '{$LandID}' LIMIT 1";
-
-        $result3 = mysqli_query($conn, $query1);
-
-        if ($recordCult = mysqli_fetch_assoc($result3)) {
-
-            $landID = $recordCult['LandID'];
-            $cropName = $recordCult['CropName'];
-            $landArea = $recordCult['LandArea'];
-            $month = $recordCult['Month'];
-
-        }
-    }
-
-    if (isset($_POST['txtLandID'])) {
-
-        $chsLandID = $_POST['txtLandID'];
-
-        $query1 = "SELECT * FROM CULTIVATION WHERE LandID = '{$chsLandID}' LIMIT 1";
-        $query2 = "SELECT * FROM FERTILIZER WHERE FertilizerID = ANY (SELECT FertilizerID FROM STORES WHERE CenterID = (SELECT CenterID FROM AGRICULTURAL_OFFICER WHERE OfficerID = '{$officerID}'))";
-
-        $result3 = mysqli_query($conn, $query1);
-        $result4 = mysqli_query($conn, $query2);
-
-        if ($recordCult = mysqli_fetch_assoc($result3)) {
-
-            $chsLandID = $recordCult['LandID'];
-            $chsCropName = $recordCult['CropName'];
-            $chsLandArea = $recordCult['LandArea'];
-            $chsMonth = $recordCult['Month'];
-
-        }
-    }
-
-    if (isset($_POST['btnBrowseFertilizer'])) {
-
-        $fertilizerName = $_POST['listFertilizers'];
-
-        $query = "SELECT a.FertilizerID, a.Description, b.QtyOnHand, b.ExpireDate FROM FERTILIZER a, STORES b WHERE a.FertilizerID = b.FertilizerID and a.FertilizerID = (SELECT FertilizerID FROM FERTILIZER WHERE Description = '{$fertilizerName}') and CenterID = (SELECT CenterID FROM AGRICULTURAL_OFFICER WHERE OfficerID = '{$officerID}')";
-
-        
-        $result5 = mysqli_query($conn, $query);
-
-        if ($record = mysqli_fetch_assoc($result5)) {
-
-            $fertilizerID = $record['FertilizerID'];
-            $description = $record['Description'];
-            $expireDate = $record['ExpireDate'];
-            $qtyOnHand = $record['QtyOnHand'];
-
-        }
-    }
-
-    /////////////////////////////////////////////////
-
-
-    if (isset($_POST['txtFerilizerID'])) {
-
-        $chsFertilizerID = $_POST['txtFerilizerID'];
-
-        $query = "SELECT a.FertilizerID, a.Description, b.QtyOnHand, b.ExpireDate FROM FERTILIZER a, STORES b WHERE a.FertilizerID = b.FertilizerID and a.FertilizerID = '{$chsFertilizerID}' and CenterID = (SELECT CenterID FROM AGRICULTURAL_OFFICER WHERE OfficerID = '{$officerID}')";
-
-        
-        $result6 = mysqli_query($conn, $query);
-
-        if ($record = mysqli_fetch_assoc($result6)) {
-
-            $chsFertilizerID = $record['FertilizerID'];
-            $chsDescription = $record['Description'];
-            $chsExpireDate = $record['ExpireDate'];
-            $chsQtyOnHand = $record['QtyOnHand'];
-
-        }
-    }
-
-    //////////////////////////////////////////////////////////////////////////
-
-    if (isset($_POST['btnSave'])) {
-
-        $farmerID = $_POST['txtFarmerID'];
-        $landID = $_POST['txtLandID'];
-        $fertilizerID = $_POST['txtFerilizerID'];
-        $amount = $_POST['txtAmount'];
-        $currentDate = date('Y-m-d');
-
-        $query1 = "SELECT QtyOnHand FROM STORES WHERE FertilizerID = '{$fertilizerID}' and CenterID = (SELECT CenterID FROM AGRICULTURAL_OFFICER WHERE OfficerID = '{$officerID}')";
-
-        $result7 = mysqli_query($conn, $query1);
-
-        $qtyOnHand = mysqli_fetch_assoc($result7)['QtyOnHand'];
-
-
-        $query2 = "INSERT INTO RECEIVES VALUES ('{$landID}', '{$fertilizerID}', '{$currentDate}', {$amount})";
-
-        $query3 = "UPDATE STORES SET QtyOnHand = ({$qtyOnHand} - {$amount}) WHERE FertilizerID = '{$fertilizerID}' and CenterID = (SELECT CenterID FROM AGRICULTURAL_OFFICER WHERE OfficerID = '{$officerID}')";
-
-        $result8 = mysqli_query($conn, $query2);
-
-        if ($result8) {
-
-            $result9 = mysqli_query($conn, $query3);
-
-            if ($result9) {
-                $msg2 = "Fertilizer Issued Successfully";
-            }
-
-        } else {
-            $msg2 = "Process Failure";
-        }
-        
-    }   
-
+}
 ?>
 
 
-
 <?php include('includes/header.php'); ?>
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+</style>
+<style>
     
-    <form action="IssueFertilizer.php" method = "post">
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
 
-        <h1>Fertilizer Issuing</h1>
-        <h4><?php echo $msgViewUser ?></h4><hr>
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+
+</style>
+
+<div>
+    <h1>Fertilizer Requests</h1>
+    <hr>
+
+    <?php
+    $query = "SELECT FR.requestId, FR.farmerId, FR.landId, FR.fertilizerId, FR.amountRequested, FR.requestDate, 
+                     F.Description AS fertilizerName, C.CropName 
+              FROM FertilizerRequest FR 
+              JOIN FERTILIZER F ON FR.fertilizerId = F.FertilizerID 
+              JOIN CULTIVATION C ON FR.landId = C.LandID";
     
-        <table>
+    $stmt = mysqli_prepare($conn, $query);
+    if ($stmt) {
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
-            <tr>
-                <td>Farmer ID : </td>
-                <td>
-                    <input type="text" name = "txtFarmerID" value = "<?php echo (isset($farmerID)) ? $farmerID : ''; ?>"></input>
-                    <button name="btnSearchID" type="submit" value="HTML">SEARCH</button>
-                    <label for="lblMsg"><b><?php echo (isset($msg1)) ? $msg1 : ''; ?></b></label>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Browse what Land to be Selected : </td>
-                <td>
-                    <select name = "listLandIDs" style="width: 150px;">
-                        <?php
-                        
-                        // Iterating through the product array
-                        while($recordLands = mysqli_fetch_assoc($result2)){
-                        ?>
-                            <option value="<?php echo $recordLands['LandID']; ?>"><?php echo $recordLands['LandID']; ?></option>
-                        <?php
-                        }
-                        ?>
-                    </select>
-
-                    <button name="btnBrowseLand" type="submit" value="HTML">BROWSE</button>
-
-                    <label for="lblLandID"><b><?php echo (isset($landID)) ? $landID : ''; ?></b></label>                    
-
-                    <label for="lblCropName"><b><?php echo (isset($cropName)) ? $cropName : ''; ?></b></label>
-
-                    <label for="lblLandArea"><b><?php echo (isset($landArea)) ? $landArea . "  ha" : ''; ?></b></label>
-
-                    <label for="lblMonth"><b><?php echo (isset($month)) ? $month : ''; ?></b></label>
-                </td>
-
-            </tr>
-
-            <tr>
-                <td>Enter Land ID: </td>
-
-                <td>
-                    <input type="text" name = "txtLandID" value = "<?php echo (isset($chsLandID)) ? $chsLandID : ''; ?>"></input>
-                    <button name="btnSubmitLandID" type="submit" value="HTML">SUBMIT</button>
-                    
-                </td>
-            </tr>
-
-            <tr>
-                <td>Land ID : </td>
-                <td><label for="lblChsLandID"><b><?php echo (isset($chsLandID)) ? $chsLandID : ''; ?></b></label></td>
-            </tr>
-            <tr>
-                <td>Crop Name : </td>
-                <td><label for="lblChsCropName"><b><?php echo (isset($chsCropName)) ? $chsCropName : ''; ?></b></label></td>
-            </tr>
-            <tr>
-                <td>Land Area : </td>
-                <td><label for="lblChsLandArea"><b><?php echo (isset($chsLandArea)) ? $chsLandArea . "  ha" : ''; ?></b></label></td>
-            </tr>
-            <tr>
-                <td>Month : </td>
-                <td><label for="lblChsMonth"><b><?php echo (isset($chsMonth)) ? $chsMonth : ''; ?></b></label></td>
-            </tr>
-            
-            <tr>
-                <td>Browse what Fertilizer to be selected : </td>
-                <td>
-                    <select name = "listFertilizers" style="width: 150px;">
-                        <?php
-                        
-                        // Iterating through the product array
-                        while($recFertilizer = mysqli_fetch_assoc($result4)){
-                        ?>
-                            <option value="<?php echo $recFertilizer['Description']; ?>"><?php echo $recFertilizer['Description']; ?></option>
-                        <?php
-                        }
-                        ?>
-                    </select>
-
-                    <button name="btnBrowseFertilizer" type="submit" value="HTML">BROWSE</button>
-
-                    <label for="lblFertilizerID"><b><?php echo (isset($fertilizerID)) ? $fertilizerID : ''; ?></label>
-
-                    <label for="lblDescription"><b><?php echo (isset($description)) ? $description : ''; ?></label>
-
-                    <label for="lblExpireDate"><b><?php echo (isset($expireDate)) ? $expireDate : ''; ?></label>
-
-                    <label for="lblQtyOnHand"><b><?php echo (isset($qtyOnHand)) ? $qtyOnHand . "  kgs" : ''; ?></label>
-                </td>
-
-            </tr>
-            
-            <tr>
-                <td>Fertilizer ID : </td>
-                <td>
-                    <input type="text" name = "txtFerilizerID" value = "<?php echo (isset($chsFertilizerID)) ? $chsFertilizerID : ''; ?>"></input>
-                    <button name="btnSubmitFertilizerID" type="submit" value="HTML">SUBMIT</button>    
-                </td>
-            </tr>
-
-            <tr>
-                <td>Fertilizer ID : </td>
-                <td><label for="lblChsFertilizerID"><b><?php echo (isset($chsFertilizerID)) ? $chsFertilizerID : ''; ?></b></label></td>
-            </tr>
-
-            <tr>
-                <td>Description : </td>
-                <td><label for="lblChsDescription"><b><?php echo (isset($chsDescription)) ? $chsDescription : ''; ?></b></label></td>
-            </tr>
-
-            <tr>
-                <td>Date of Expiry : </td>
-                <td><label for="lblChsExpireDate"><b><?php echo (isset($chsExpireDate)) ? $chsExpireDate : ''; ?></b></label></td>
-            </tr>
-
-            <tr>
-                <td>Qty on Hand : </td>
-                <td><label for="lblChsQtyOnHand"><b><?php echo (isset($chsQtyOnHand)) ? $chsQtyOnHand . "  kgs": ''; ?></b></label></td>
-            </tr>
-
-            <tr>
-                <td>Amount : </td>
-                <td>
-                    <input type="text" name = "txtAmount" value = "<?php echo (isset($amount)) ? $amount : ''; ?>"></input>
-                    <button name="btnSave" type="submit" value="HTML">SAVE</button>
-                    <label for="lblSaveMsg"><b><?php echo (isset($msg2)) ? $msg2 : ''; ?></b></label>
-                </td>
-            </tr>
-            
-        </table>
-
-	</form> 
+        if (mysqli_num_rows($result) > 0) {
+            echo '<table>';
+            echo '<tr><th>Request ID</th><th>Land ID</th><th>Crop Name</th><th>Fertilizer ID</th><th>Fertilizer Name</th><th>Amount Requested</th><th>Request Date</th><th>Action</th></tr>';
+            while ($row = mysqli_fetch_assoc($result)) {
+                echo '<tr>';
+                echo '<td>' . htmlspecialchars($row['requestId']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['landId']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['CropName']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['fertilizerId']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['fertilizerName']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['amountRequested']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['requestDate']) . '</td>';
+                echo '<td><form method="POST"><input type="hidden" name="requestId" value="' . htmlspecialchars($row['requestId']) . '"><input type="hidden" name="landId" value="' . htmlspecialchars($row['landId']) . '"><input type="hidden" name="fertilizerId" value="' . htmlspecialchars($row['fertilizerId']) . '"><input type="hidden" name="amountRequested" value="' . htmlspecialchars($row['amountRequested']) . '"><button type="submit" name="approve">Approve</button></form></td>';
+                echo '</tr>';
+            }
+            echo '</table>';
+        } else {
+            echo '<p>No fertilizer requests found.</p>';
+        }
+        mysqli_stmt_close($stmt);
+    }
+    ?>
+</div>
 
 <?php include('includes/footer.php'); ?>
-
-</body>
-</html>
-
 <?php mysqli_close($conn); ?>

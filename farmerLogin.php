@@ -26,6 +26,7 @@ if (isset($_POST['btnLogin'])) {
 			// todo create better way to authenticate user 
             if ($password == $hashed_password) {
                 $_SESSION['userID'] = $userID;
+                $_SESSION['role'] = 'farmer';
                 header("Location: FarmersView.php");
                 exit;
             } else {
