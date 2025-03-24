@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>KTDA Farmer Management</title>
+    <title>KTDA Clerk Portal</title>
     <link rel="stylesheet" type="text/css" href="css/main.css">
     <style>
 
@@ -49,20 +49,14 @@ h1{
 <body>
 
     <header>
-        <h1>KTDA Farmer Management</h1>
+        <h1>KTDA Clerk Portal</h1>
     </header>
 
     <nav>
         <ul>
-            <li class= "button button1"><a href="Farmers.php">Farmers</a></li>
-            <li class= "button button1"><a href="Cultivations.php">Cultivations</a></li>
-            <li class= "button button1"><a href="IssueFertilizer.php">Fertilizer Issuing</a></li>
-            <li class= "button button1"><a href="ViewStock.php">View Stock</a></li>
-            <li class= "button button1"><a href="Produce.php">View Produce</a></li>
-            <!--            
-            <li><a href="about-us.php">About Us</a></li>
-            <li><a href="contact-us.php">Contact Us</a></li>
-            <li><a href="services.php">Services</a></li>
-            -->
+            <li class= "button button1"><a href="ClerkDashboard.php">Farmers</a></li>
+            <li class= "button button1"><a href="ClerkProduceRecord.php">Produce Record</a></li>
+            <li class= "button button1"><a href="ClerkAddProduce.php">Add Produce</a></li>
+           
         </ul>
     </nav>

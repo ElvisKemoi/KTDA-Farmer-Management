@@ -56,9 +56,10 @@ if (isset($_POST['btnLogin'])) {
 		<button class="navbar-toggler" data-toggle="collapse" data-target="#navbar_id"><span class="navbar-toggler-icon"></span></button>
 		<div class="collapse navbar-collapse justify-content-center" id="navbar_id">
 		<ul class="navbar-nav">
-				<li class="nav-item"><a href="index.html" class="nav-link">HOME</a></li>
+				<li class="nav-item"><a href="index.html" class="nav-link ">HOME</a></li>
 				<li class="nav-item"><a href="Login.php" class="nav-link active">AGRICULTURAL OFFICER LOGIN</a></li>
 				<li class="nav-item"><a href="farmerLogin.php" class="nav-link">FARMER LOGIN</a></li>
+				<li class="nav-item"><a href="ClerkLogin.php" class="nav-link">CLERK LOGIN</a></li>
 			</ul>
 		</collapse>	
 	</nav><!-- class="navbar" -->

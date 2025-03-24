@@ -57,6 +57,6 @@ h1{
             <li class= "button button1"><a href="FarmersView.php">Farmers</a></li>
             <li class= "button button1"><a href="FarmerIssueFertilizer.php">Fertilizer Issuing</a></li>
             <li class= "button button1"><a href="FertilizerRequests.php">Fertilizer Requests</a></li>
-            <li class= "button button1"><a href="">View Stock</a></li>
+            <li class= "button button1"><a href="FarmerProduce.php">My Produce</a></li>
         </ul>
     </nav>
