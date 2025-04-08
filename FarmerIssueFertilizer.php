@@ -8,6 +8,8 @@ if (!isset($_SESSION['userID'])) {
     exit();
 }
     $farmerId = $_SESSION['userID'];
+
+    $msgViewUser = "";
   
     $query = "SELECT FarmerID, Address, FName, LName FROM Farmer WHERE FarmerID = '{$farmerId}' LIMIT 1";
 

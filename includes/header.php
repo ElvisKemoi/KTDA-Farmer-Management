@@ -58,7 +58,10 @@ h1{
             <li class= "button button1"><a href="Cultivations.php">Cultivations</a></li>
             <li class= "button button1"><a href="IssueFertilizer.php">Fertilizer Issuing</a></li>
             <li class= "button button1"><a href="ViewStock.php">View Stock</a></li>
-            <li class= "button button1"><a href="Produce.php">View Produce</a></li>
+            <!-- <li class= "button button1"><a href="Produce.php">View Produce</a></li> -->
+            <li class= "button button1"><a href="AdminQuestionare.php">QuestionnaireTemplates</a></li>
+            <li class= "button button1"><a href="FarmerPickUpSchedule.php">Set Pickup Schedule</a></li>
+
             <!--            
             <li><a href="about-us.php">About Us</a></li>
             <li><a href="contact-us.php">Contact Us</a></li>
