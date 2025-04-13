@@ -7,6 +7,8 @@ if (!isset($_SESSION['userID'])) {
     header("Location: login.php"); // Redirect to login page if not logged in
     exit;
 }
+include('includes/header.php'); 
+
 
 $officerID = $_SESSION['userID'];
 $query = "SELECT OfficerID, CenterID, FName, LName FROM AGRICULTURAL_OFFICER WHERE OfficerID = '{$officerID}' LIMIT 1";
@@ -22,29 +24,6 @@ if ($recordRow = mysqli_fetch_assoc($result)) {
     $msgViewUser = "Login as {$userOfficerID} - {$userFName} {$userLName} under Center - {$userCenterID}";
 }
 ?>
-
-<?php include('includes/header.php'); ?>
-    
-    <style>
-    
-        table {
-            font-family: arial, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        td, th {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-
-        tr:nth-child(even) {
-            background-color: #dddddd;
-        }
-
-    </style>
-
     <h1>Store Info</h1>
     <h4><?php echo $msgViewUser ?></h4><hr>
 

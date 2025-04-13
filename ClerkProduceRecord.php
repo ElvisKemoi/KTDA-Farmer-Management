@@ -7,41 +7,19 @@ if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
     exit;
 }
+ include('includes/clerkHeader.php'); 
+
 // Fetch clerk details
 $clerkId = $_SESSION['userID'];
-$query = "SELECT ClerkID, Address, FName, LName, NIC, TelNo FROM Clerk WHERE ClerkID = ? LIMIT 1";
+$query = "SELECT ClerkID, Address, FName, LName, TelNo FROM Clerk WHERE ClerkID = ? LIMIT 1";
 $stmt = mysqli_prepare($conn, $query);
 
 ?>
-<?php include('includes/clerkHeader.php'); ?>
 
-<style>
-    table {
-        font-family: Arial, sans-serif;
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    td, th {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-    }
-
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-
-    .total-row {
-        font-weight: bold;
-        background-color: #d1e7dd;
-    }
-</style>
 
 <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
 
     <h1>All Produce</h1>
-
     <table>
         <tr>
             <th>Produce ID</th>

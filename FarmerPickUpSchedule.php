@@ -2,29 +2,19 @@
 require_once('includes/connection.php');
 session_start();
 
-// Updated Admin Credentials
-$admin_credentials = [
-    'A001' => 'abcd1234',  // Corrected password
-    'A002' => '123xyz', 
-    'A003' => '#170#'
-];
-
-// Improved Admin Authentication Check
-$isAdmin = false;
-if (isset($_SESSION['userID']) && isset($admin_credentials[$_SESSION['userID']])) {
-    $isAdmin = true;
+// Check if the user is logged in
+if (!isset($_SESSION['userID'])) {
+    header("Location: login.php");
+    exit;
 }
+include('includes/header.php');
 
 // Predefined Pickup Venues
 $pickupVenues = [
     'Kinda', 'Westy', 'Nai', 'Kiro', 'Gikoe'
 ];
 
-// If not an admin, redirect to login
-if (!$isAdmin) {
-    header("Location: Login.php");
-    exit;
-}
+
 
 // Initialize error message
 $error_message = '';
@@ -75,13 +65,6 @@ $schedulesQuery = "SELECT * FROM TeaPickupSchedules ORDER BY Venue";
 $schedulesResult = mysqli_query($conn, $schedulesQuery);
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tea Pickup Schedule Management</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
     <div class="container mt-5">
         <h1 class="mb-4">Manage Tea Pickup Schedules</h1>
         
@@ -149,7 +132,7 @@ $schedulesResult = mysqli_query($conn, $schedulesQuery);
             </tbody>
         </table>
     </div>
-</body>
-</html>
+<?php include('includes/footer.php'); ?>
+
 
 <?php mysqli_close($conn); ?>

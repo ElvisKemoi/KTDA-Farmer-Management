@@ -7,6 +7,8 @@ if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
     exit;
 }
+ include('includes/farmerHeader.php'); 
+
 
 $farmerId = $_SESSION['userID'];
 
@@ -68,24 +70,6 @@ if ($taskStmt) {
     mysqli_stmt_close($taskStmt);
 }
 ?>
-
-<?php include('includes/farmerHeader.php'); ?>
-
-<style>
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-</style>
-
 <div class="task-scheduler">
     <h1>My Task Scheduler</h1>
     

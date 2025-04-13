@@ -8,6 +8,9 @@ if (!isset($_SESSION['userID'])) {
     exit;
 }
 
+include('includes/header.php');
+
+
 $officerID = $_SESSION['userID'];
 $query = "SELECT OfficerID, CenterID, FName, LName FROM AGRICULTURAL_OFFICER WHERE OfficerID = '{$officerID}' LIMIT 1";
 
@@ -77,12 +80,7 @@ if (isset($_POST['btn_save'])) {
         $msg2 = $result ? "New land added successfully" : "Failed adding new record";
     }
 }
-?>
-
-
-
-<?php include('includes/header.php'); ?>
-    
+?>    
     <form action="Cultivations.php" method = "post">
 
         <h1>View Cultivation Info</h1>

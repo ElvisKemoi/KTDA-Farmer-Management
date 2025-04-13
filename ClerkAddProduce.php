@@ -2,11 +2,12 @@
 require_once('includes/connection.php'); 
 session_start();
 
-// Check if user is logged in
+// Check if the user is logged in
 if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
     exit;
 }
+include('includes/clerkHeader.php');
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $farmerID = $_POST['farmerID'];
@@ -36,40 +37,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $query = "SELECT FarmerID, FName, LName FROM Farmer ORDER BY FName ASC";
 $result = mysqli_query($conn, $query);
 ?>
-
-<?php include('includes/clerkHeader.php'); ?>
-
-<style>
-    form {
-        width: 50%;
-        margin: auto;
-        padding: 20px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background-color: #f9f9f9;
-    }
-
-    label {
-        font-weight: bold;
-    }
-
-    select, input[type="number"], input[type="submit"] {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        margin-bottom: 15px;
-    }
-
-    .success {
-        color: green;
-        font-weight: bold;
-    }
-
-    .error {
-        color: red;
-        font-weight: bold;
-    }
-</style>
 
 <h1 style="text-align: center;">Add New Produce</h1>
 

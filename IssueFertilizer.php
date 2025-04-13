@@ -3,10 +3,11 @@ require_once('includes/connection.php');
 session_start();
 
 // Check if the user is logged in as an agricultural officer
-if (!isset($_SESSION['userID']) || $_SESSION['role'] !== 'officer') {
+if (!isset($_SESSION['userID']) ) {
     header("Location: login.php");
     exit;
 }
+include('includes/header.php');
 
 $officerId = $_SESSION['userID'];
 $query = "SELECT OfficerID, FName, LName, CenterID FROM AGRICULTURAL_OFFICER WHERE OfficerID = ? LIMIT 1";
@@ -69,15 +70,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['approve'])) {
             die("Error deleting request: " . mysqli_error($conn));
         }
 
-        echo "<p>Request approved successfully!</p>";
+        $approvalMessage = "Request ID $requestId has been approved and the fertilizer has been issued.";
+
+        // echo "<p>Request approved successfully!</p>";
     } else {
-        echo "<p>Insufficient stock in your center to approve this request.</p>";
+        $approvalMessageError = "Insufficient stock in your center to approve this request.";
+        // echo "<p>Insufficient stock in your center to approve this request.</p>";
     }
 }
 ?>
-
-
-<?php include('includes/header.php'); ?>
 <style>
     table, th, td {
         border: 1px solid black;
@@ -107,6 +108,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['approve'])) {
 <div>
     <h1>Fertilizer Requests</h1>
     <hr>
+    <?php
+    if (isset($approvalMessage)) {
+        echo '<p style="color: green;">' . htmlspecialchars($approvalMessage) . '</p>';
+    }
+    if (isset($approvalMessageError)) {
+        echo '<p style="color: red;">' . htmlspecialchars($approvalMessageError) . '</p>';
+    }
+     ?>
 
     <?php
     $query = "SELECT FR.requestId, FR.farmerId, FR.landId, FR.fertilizerId, FR.amountRequested, FR.requestDate, 

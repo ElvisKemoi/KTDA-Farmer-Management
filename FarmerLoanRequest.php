@@ -83,7 +83,7 @@ if (!isset($_SESSION['userID'])) {
             </td>
         </tr>
         <tr>
-            <td>Loan Amount (Rs): </td>
+            <td>Loan Amount (Ksh): </td>
             <td>
                 <input type="number" name="txtLoanAmount" min="1000" step="100" required>
                 <button name="btnSaveLoanRequest" type="submit">Submit Loan Request</button>

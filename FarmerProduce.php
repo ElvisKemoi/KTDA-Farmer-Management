@@ -7,6 +7,8 @@ if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
     exit;
 }
+include('includes/farmerHeader.php');
+
 
 $farmerId = $_SESSION['userID'];
 $query = "SELECT FarmerID, Address, FName, LName, NIC, TelNo FROM Farmer WHERE FarmerID = ? LIMIT 1";
@@ -32,34 +34,6 @@ if ($stmt) {
     mysqli_stmt_close($stmt);
 }
 ?>
-
-<?php include('includes/farmerHeader.php'); ?>
-<style>
-    table, th, td {
-        border: 1px solid black;
-        border-collapse: collapse;
-    }
-</style>
- 
-<style>
-    
-    table {
-        font-family: arial, sans-serif;
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    td, th {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-    }
-
-    tr:nth-child(even) {
-        background-color: #dddddd;
-    }
-
-</style>
 <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
 
     <h1>My Produce</h1>

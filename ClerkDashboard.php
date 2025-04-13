@@ -4,9 +4,10 @@ session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['userID'])) {
-    header("Location: login.php"); // Redirect to login page
+    header("Location: login.php");
     exit;
 }
+include('includes/clerkHeader.php');
 
 $officerID = $_SESSION['userID'];
 $query = "SELECT OfficerID, CenterID, FName, LName FROM AGRICULTURAL_OFFICER WHERE OfficerID = ? LIMIT 1";
@@ -126,60 +127,32 @@ if (isset($_POST['btnSearchID'])) {
 }
 ?>
 
-
-<?php include('includes/clerkHeader.php'); ?>
-<style>
-    table, th, td {
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-</style>
- 
-<style>
-    
-    table {
-        font-family: arial, sans-serif;
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    td, th {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-    }
-
-    tr:nth-child(even) {
-        background-color: #dddddd;
-    }
-
-</style>
     <div>
-    <h1>All Farmers</h1>
-    <hr>
-    <?php
-        $farmers = getAllFarmers($conn);
+        <h1>All Farmers</h1>
+        <hr>
+        <?php
+            $farmers = getAllFarmers($conn);
 
-        if ($farmers && mysqli_num_rows($farmers) > 0) {
-            echo '<table>';
-            echo '<tr><th>Farmer ID</th><th>First Name</th><th>Last Name</th><th>Address</th><th>Tel No</th><th>NIC</th></tr>';
-            while ($row = mysqli_fetch_assoc($farmers)) {
-                echo '<tr>';
-                echo '<td>' . htmlspecialchars($row['FarmerID']) . '</td>';
-                echo '<td>' . htmlspecialchars($row['FName']) . '</td>';
-                echo '<td>' . htmlspecialchars($row['LName']) . '</td>';
-                echo '<td>' . htmlspecialchars($row['Address']) . '</td>';
-                echo '<td>' . htmlspecialchars($row['TelNo']) . '</td>';
-                echo '<td>' . htmlspecialchars($row['NIC']) . '</td>';
-                echo '</tr>';
+            if ($farmers && mysqli_num_rows($farmers) > 0) {
+                echo '<table>';
+                echo '<tr><th>Farmer ID</th><th>First Name</th><th>Last Name</th><th>Address</th><th>Tel No</th><th>NIC</th></tr>';
+                while ($row = mysqli_fetch_assoc($farmers)) {
+                    echo '<tr>';
+                    echo '<td>' . htmlspecialchars($row['FarmerID']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['FName']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['LName']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['Address']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['TelNo']) . '</td>';
+                    echo '<td>' . htmlspecialchars($row['NIC']) . '</td>';
+                    echo '</tr>';
+                }
+                echo '</table>';
+            } else {
+                echo '<p>No farmers found.</p>';
             }
-            echo '</table>';
-        } else {
-            echo '<p>No farmers found.</p>';
-        }
-?>
+        ?>
+    </div>
 
-</div>
 
 
 <?php include('includes/footer.php'); ?>

@@ -7,10 +7,11 @@ if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
     exit;
 }
+include('includes/header.php'); 
 
 // Fetch farmer details
 $farmerId = $_SESSION['userID'];
-$query = "SELECT FarmerID, Address, FName, LName, NIC, TelNo FROM Farmer WHERE FarmerID = ? LIMIT 1";
+$query = "SELECT OfficerID, CenterID, FName, LName FROM AGRICULTURAL_OFFICER WHERE OfficerID = ? LIMIT 1";
 $stmt = mysqli_prepare($conn, $query);
 
 if ($stmt) {
@@ -19,45 +20,19 @@ if ($stmt) {
     $result = mysqli_stmt_get_result($stmt);
 
     if ($recordRow = mysqli_fetch_assoc($result)) {
-        $userFarmerId = $recordRow['FarmerID'];
-        $userAddress = $recordRow['Address'];
+        $userOfficerID = $recordRow['OfficerID'];
+        $userCenterID = $recordRow['CenterID'];
         $userFName = $recordRow['FName'];
         $userLName = $recordRow['LName'];
-        $userNIC = $recordRow['NIC'];
-        $userTelNo = $recordRow['TelNo'];
 
-        $msgViewUser = "Login as {$userFarmerId} - {$userFName} {$userLName} from - {$userAddress}";
+        $msgViewUser = "Login as {$userOfficerID} - {$userFName} {$userLName} under Center - {$userCenterID}";
+
     } else {
         $msgViewUser = "User details not found.";
     }
     mysqli_stmt_close($stmt);
 }
 ?>
-
-<?php include('includes/farmerHeader.php'); ?>
-
-<style>
-    table {
-        font-family: Arial, sans-serif;
-        border-collapse: collapse;
-        width: 100%;
-    }
-
-    td, th {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-    }
-
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-
-    .total-row {
-        font-weight: bold;
-        background-color: #d1e7dd;
-    }
-</style>
 
 <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
 

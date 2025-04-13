@@ -7,6 +7,8 @@ if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
     exit;
 }
+include('includes/farmerHeader.php');
+
 
 $farmerId = $_SESSION['userID'];
 
@@ -62,7 +64,6 @@ mysqli_stmt_execute($historyStmt);
 $historyResult = mysqli_stmt_get_result($historyStmt);
 ?>
 
-<?php include('includes/farmerHeader.php'); ?>
 
 <div class="questionnaire-container">
     <h1>Questionnaires</h1>

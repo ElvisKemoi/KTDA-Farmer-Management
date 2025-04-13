@@ -1,12 +1,14 @@
 <?php 
-require_once('includes/connection.php');
-session_start();
+    require_once('includes/connection.php');
+    session_start();
 
-// Check if the user is logged in
-if (!isset($_SESSION['userID'])) {
-    header("Location: login.php"); // Redirect to login page
-    exit();
-}
+    // Check if the user is logged in
+    if (!isset($_SESSION['userID'])) {
+        header("Location: login.php"); // Redirect to login page
+        exit();
+    }
+    include('includes/farmerHeader.php');
+    
     $farmerId = $_SESSION['userID'];
 
     $msgViewUser = "";
@@ -31,7 +33,7 @@ if (!isset($_SESSION['userID'])) {
     $farmerID = $farmerId;
     
     $query1 = "SELECT FName, LName FROM FARMER WHERE FarmerID = '{$farmerID}' LIMIT 1";
-    $query2 = "SELECT LandID FROM CULTIVATION WHERE FarmerID = '{$farmerID}' ";
+    $query2 = "SELECT LandID FROM CULTIVATION  ";
 
     $result1 = mysqli_query($conn, $query1);
 
@@ -153,14 +155,9 @@ if (!isset($_SESSION['userID'])) {
     }
     
 ?>
-
-
-
-<?php include('includes/farmerHeader.php'); ?>
-    
     <form action="FarmerIssueFertilizer.php" method = "post">
 
-        <h1>Fertilizer Issuing | Request</h1>
+        <h1>Fertilizer Request</h1>
         <h4><?php echo $msgViewUser ?></h4><hr>
     
         <table>

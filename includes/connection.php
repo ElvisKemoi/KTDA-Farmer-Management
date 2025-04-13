@@ -1,6 +1,6 @@
 <?php
 $servername = "localhost";
-$database = "fertilizer_management1";
+$database = "fertilizer_management";
 $username = "root";
 $password = "";
 
